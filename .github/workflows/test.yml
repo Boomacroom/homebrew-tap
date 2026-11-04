@@ -1,0 +1,30 @@
+# Installs the cask the way people do and starts the app once (HEXPALACE_SMOKE: the page drew and
+# sharp loaded), on every change to the cask.
+name: test
+
+on:
+  push:
+    paths: ['Casks/**', '.github/workflows/test.yml']
+  workflow_dispatch:
+
+jobs:
+  install:
+    runs-on: macos-14
+    steps:
+      - name: Style and audit
+        run: |
+          brew tap boomacroom/tap
+          brew style --cask boomacroom/tap/hexpalace
+          brew audit --cask --online boomacroom/tap/hexpalace || true
+      - name: Install
+        run: brew install --cask boomacroom/tap/hexpalace
+      - name: Start it once
+        run: |
+          codesign -dv /Applications/HexPalace.app 2>&1 | grep -E 'Signature|Format'
+          HEXPALACE_SMOKE="$RUNNER_TEMP/smoke.png" /Applications/HexPalace.app/Contents/MacOS/HexPalace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: smoke
+          path: ${{ runner.temp }}/smoke.png
+      - name: Uninstall
+        run: brew uninstall --cask --zap hexpalace

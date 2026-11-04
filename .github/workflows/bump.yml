@@ -1,0 +1,31 @@
+# Keeps Casks/hexpalace.rb on the newest Mac release: hexpalace.com/dl/latest-mac.yml names the
+# version (it's uploaded after the .dmg files), and both .dmg files are hashed here.
+name: bump
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update the cask if there's a new version
+        run: |
+          v=$(curl -fsSL https://hexpalace.com/dl/latest-mac.yml | sed -n 's/^version: *//p' | tr -d "'\"\r")
+          cur=$(sed -n 's/^  version "\(.*\)"$/\1/p' Casks/hexpalace.rb)
+          if [ -z "$v" ] || [ "$v" = "$cur" ]; then echo "up to date ($cur)"; exit 0; fi
+          arm=$(curl -fsSL "https://hexpalace.com/dl/HexPalace-$v-mac-arm64.dmg" | sha256sum | cut -d' ' -f1)
+          intel=$(curl -fsSL "https://hexpalace.com/dl/HexPalace-$v-mac-x64.dmg" | sha256sum | cut -d' ' -f1)
+          sed -i -e "s/^  version \".*\"$/  version \"$v\"/" \
+                 -e "s/arm:   \"[0-9a-f]*\"/arm:   \"$arm\"/" \
+                 -e "s/intel: \"[0-9a-f]*\"/intel: \"$intel\"/" Casks/hexpalace.rb
+          git config user.name "hexpalace-bot"
+          git config user.email "support@hexpalace.com"
+          git commit -am "hexpalace $v"
+          git push
