@@ -1,9 +1,9 @@
 cask "hexpalace" do
   arch arm: "arm64", intel: "x64"
 
-  version "1.3.0"
-  sha256 arm:   "2dc7aa5e29f5f946ef42cf243544f5b495b04cc5102da028612c20b0601027ed",
-         intel: "8d475af62578ce96d2e6c24e803ab0e618f6a5ec19a9450d14567bc0136d09ac"
+  version "1.4.0"
+  sha256 arm:   "5657449afadbfb9b7dca5fc9f706edd94f36fa66d839b7101e657e6c21373c55",
+         intel: "34d23d93c1df68d35bbd2d232971a7c4d8635d4073f5912d896b44bf2ea18f21"
 
   url "https://hexpalace.com/dl/HexPalace-#{version}-mac-#{arch}.dmg"
   name "HexPalace"
